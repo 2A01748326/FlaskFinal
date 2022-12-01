@@ -2,7 +2,6 @@ from flask import Flask, request, jsonify, render_template, session
 import numpy as np
 import pandas as pd
 from joblib import load
-from  werkzeug.utils import secure_filename
 import os
 
 #paths
