@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 from joblib import load
 import os
+from flask_cors import CORS
 
 #paths
 upload_folder_path = os.path.join('static', 'uploads')
@@ -12,6 +13,7 @@ dt = load('model.joblib')
 #Generar el servidor
 servidorWeb = Flask(__name__, template_folder='templates', static_folder='static')
 servidorWeb.config['UPLOAD_FOLDER'] = upload_folder_path
+CORS(servidorWeb)
 
 @servidorWeb.route('/modelo', methods=['GET'])
 def form():
@@ -22,14 +24,15 @@ def reentrenar():
     if request.method == "POST":
         contenido = request.json
         lista = contenido['DB']
+        print(lista)
         dataFrame = pd.DataFrame.from_records(lista)
 
-        dataFrame['Outcome'] = dataFrame['Outcome'].replace([0,1],['noDiabetico', 'Diabetico'])
+        dataFrame['resultado'] = dataFrame['resultado'].replace([0,1],['noDiabetico', 'Diabetico'])
 
         #Caracteristicas de entrada (Informacion de los campos del formulario)
-        X = dataFrame.drop('Outcome', axis=1)
+        X = dataFrame.drop('resultado', axis=1)
         #Caracteristicas de salida ()
-        y = dataFrame['Outcome']
+        y = dataFrame['resultado']
 
         #Separar la bas de datos en dos conjuntos entrenamiento (guia de estudio) y prueba(examen)
         from sklearn.model_selection import train_test_split
@@ -42,7 +45,7 @@ def reentrenar():
         for ker in kernels:
             dt = svm.SVC(kernel=ker)
             dt.fit(X_train, y_train)
-            model.append(dt)
+            models.append(dt)
 
         bestModel = None
         bestScore = 0
@@ -53,15 +56,15 @@ def reentrenar():
                 bestModel = model
 
         dump(bestModel, 'model.joblib')
+        return f"Reentrenado correctamente, score: {bestScore}"
 
 
 
-@servidorWeb.route('/modelo/modeloForm', methods=['POST', 'GET'])
+@servidorWeb.route('/modelo/prediccion', methods=['POST', 'GET'])
 def model():
   if request.method == "POST":
     #Procesar datos de la entrada
     #contenido = request.json
-    table = []
     contenido = request.json
     '''
     if request.files['file']:
@@ -91,10 +94,8 @@ def model():
     resultado = dt.predict(datosEntrada.reshape(1, -1))
     #Regresar la salida del modelo
     #return jsonify({"Resultado":str(resultado[0])})
-    datosEntrada = datosEntrada.tolist()
-    datosEntrada.append(resultado[0])
-    table.insert(0, datosEntrada)
-    return resultado.tolist()[0]
+    resultado = resultado.tolist()
+    return resultado[0]
     #return render_template('Table1.html', table=table)
 
 if __name__ == '__main__':
