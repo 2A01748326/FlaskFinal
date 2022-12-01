@@ -26,11 +26,14 @@ def reentrenar():
         lista = contenido['DB']
         print(lista)
         dataFrame = pd.DataFrame.from_records(lista)
+        print(dataFrame)
 
         dataFrame['resultado'] = dataFrame['resultado'].replace([0,1],['noDiabetico', 'Diabetico'])
 
         #Caracteristicas de entrada (Informacion de los campos del formulario)
         X = dataFrame.drop('resultado', axis=1)
+        X = X.drop('id', axis=1)
+        print(X)
         #Caracteristicas de salida ()
         y = dataFrame['resultado']
 
