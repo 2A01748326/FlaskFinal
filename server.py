@@ -1,7 +1,7 @@
 from flask import Flask, request, jsonify, render_template, session
 import numpy as np
 import pandas as pd
-from joblib import load
+from joblib import load, dump
 import os
 from flask_cors import CORS
 
